@@ -160,6 +160,31 @@
 			}
 		}
 	}
-
-
+	class Tool{
+		public static function String($number){
+			return strval($number);
+		}
+		public static function Number($number){
+			return intval($number);
+		}
+		public static function parseFloat($number){
+			return floatval($number);
+		}
+		public static function parseInt($number){
+			return intval($number);
+		}
+		public static function ceil($number){
+			return ceil($number);
+		}
+		public static function round($number){
+			return round($number);
+		}
+		public static function floor($number){
+			return floor($number);
+		}
+		public static function random($min,$max){
+			return rand($min+1,$max-1);
+		}
+	}
+	
 ?>
