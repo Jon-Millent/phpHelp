@@ -64,12 +64,15 @@
 			}
 			return $str;
 		}
+		public function replace($rule,$g){
+			return preg_replace($rule,$g,$this->val);
+		}
 	}
-	class MArray{
-		private $val;
-		private $length;
-		private $index = 0;
-		function __construct($arr){
+	class ArrFactory{
+		protected $val;
+		protected $length;
+		protected $index = 0;
+		function __construct($arr=Array()){
 			$this->val = $arr;
 			$this->length = sizeof($arr);
 		}
@@ -85,13 +88,13 @@
 				$this->length = 0;
 			}
 		}
-		private function setLength(){
+		protected function setLength(){
 			 return $this->length=sizeof($this->val);
 		}
-		function get($index){
+		public function get($index){
 			return $this->val[$index];
 		}
-		function set($index,$val){
+		public function set($index,$val){
 			return $this->val[$index] = $val;
 		}
 		public function push($some){
@@ -159,6 +162,34 @@
 				return new MArray($this->val);
 			}
 		}
+		public function getIndex($val){
+			while($this->each()){
+				$hh = $this->next();
+				if($hh[1] == $val){
+					return $hh[0];
+				}
+			}
+			return -1;
+		}
+	}
+	class MArray extends ArrFactory{
+
+	}
+	class MJson extends ArrFactory{
+
+		public function set($k,$v){
+			$this->val[$k] = $v;
+		}
+		public function get($k){
+			return $this->val[$k];
+		}
+		public function each(){
+			return $this->val;
+		}
+		public function stringify(){
+			return json_encode($this->val);
+		}
+
 	}
 	class Tool{
 		public static function String($number){
@@ -185,6 +216,27 @@
 		public static function random($min,$max){
 			return rand($min+1,$max-1);
 		}
+		public static function parse($json){
+			return new MJson(var_dump(json_decode($json, true)));
+		}
 	}
-	
+	class MRegExp{
+		private $rule;
+		function __construct($rule){
+			$this->rule = $rule;
+		}
+		public function test($str,$matches,$type=''){
+			if($type == ''){
+				return preg_match($this->rule,$str,$matches);
+			}else if($type == 'g'){
+				return preg_match_all($this->rule,$str,$matches);
+			}
+			
+		}
+
+	}
+	class MFile{
+		
+	}
+
 ?>
