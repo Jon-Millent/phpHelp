@@ -67,6 +67,14 @@
 		public function replace($rule,$g){
 			return preg_replace($rule,$g,$this->val);
 		}
+		public function indexOf($rule){
+			for($i=0;$i<$this->length;$i++){
+				if($this->charAt($i) == $rule){
+					return true;
+				}
+			}
+			return -1;
+		}
 	}
 	class ArrFactory{
 		protected $val;
@@ -225,18 +233,60 @@
 		function __construct($rule){
 			$this->rule = $rule;
 		}
-		public function test($str,$matches,$type=''){
+		public function test($str,$type=''){
 			if($type == ''){
-				return preg_match($this->rule,$str,$matches);
+				return preg_match($this->rule,$str);
 			}else if($type == 'g'){
-				return preg_match_all($this->rule,$str,$matches);
+				return preg_match_all($this->rule,$str);
 			}
 			
 		}
 
 	}
 	class MFile{
-		
+		protected $url;
+		protected $concat;
+		protected $childrenAllName = Array();
+		protected $childrenName = Array();
+		function __construct($url){
+			if(is_dir($url)){
+				$this->url = $url;
+				if ($dh = opendir($url)){
+					while (($file = readdir($dh))!= false){
+						
+						$filePath = $url.$file;
+						
+						array_push($this->childrenAllName,$filePath);
+						array_push($this->childrenName,$file);
+						
+					}
+					closedir($dh);
+				}
+				$contype = new MString($url);
+				
+				if($contype->indexOf('/') != -1){
+					$this->concat = '/';
+				}else if($contype->indexOf('\\')  != -1){
+					$this->concat = '\\';
+				}
+				$this->url = $contype->replace('/[\|\/]$/','');
+			}
+		}	
+		protected function concatURL($filename){
+
+			return $this->url.$this->concat.$filename;
+		}
+		public function getChildren(){
+			return new MArray($this->childrenName);
+		}
+		public function getChildrenFull(){
+			return new MArray($this->childrenAllName);
+		}
+		public function open($filename){
+			echo $this->concat;
+			echo $this->concatURL($filename);
+		}
 	}
+	
 
 ?>
