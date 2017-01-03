@@ -359,11 +359,20 @@
 		}
 		public function rename($name){
 			$last = $this->compLastUrl();
-			return rename($this->url,$last.$this->concat.$name);
+			if(rename($this->url,$last.$this->concat.$name)){
+				$this->url = $last.$this->concat.$name;
+				return true;
+			}
+			return false;
 		}
+		// public function remove(){
+		// 	if($this->getChildren()->length <= 1){
+		// 		rmdir($this->url);
+		// 	}else{
+				
+		// 	}
+		// }
 	}
-	$gg = new MFile('F:\\cpp\\php');
 
-	$gg->rename('ss');
 
 ?>
