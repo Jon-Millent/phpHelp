@@ -64,6 +64,9 @@
 			}
 			return $str;
 		}
+		public function get(){
+			return $this->val;
+		}
 		public function replace($rule,$g){
 			return preg_replace($rule,$g,$this->val);
 		}
@@ -351,8 +354,8 @@
 					$this->nowOpenType = 2;
 					$this->url = $this->nowOpen;
 					$this->compConstruct();
+					return $this;
 				}	
-				return $this;
 			}else{
 				return false;
 			}
@@ -369,10 +372,13 @@
 		// 	if($this->getChildren()->length <= 1){
 		// 		rmdir($this->url);
 		// 	}else{
-				
+
 		// 	}
 		// }
 	}
-
+	// function getFileName(){
+	// 	$tt = new MString(date('Y-m-d H:i:s'));
+	// 	return $tt->replace('/[-|:|\s]/','');
+	// }		
 
 ?>
