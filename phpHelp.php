@@ -73,7 +73,7 @@
 					return true;
 				}
 			}
-			return -1;
+			return false;
 		}
 	}
 	class ArrFactory{
@@ -132,7 +132,7 @@
 					return true;
 				}
 			}
-			return -1;
+			return false;
 		}
 		public function each(){
 			if($this->index < $this->length){
@@ -241,39 +241,98 @@
 			}
 			
 		}
+	}
+	class MFileSystem{
+		protected $url;
+		protected $type;
+		protected $lasturl;
+		function __construct($url,$lasturl,$type){
+			$this->url = $url;
+			$this->type = $type;
+			$this->lasturl = $lasturl;
+		}
+		function __toString(){
+			return $this->url;
+		}
+		public function readFile(){
+			$file = fopen($this->url,"r");
+			$hh = fread($file,filesize($this->url));
+			fclose($file);
+			return $hh;
+		}
+		public function writeFile($text){
+			$file = fopen($this->url,"w");
+			$len = fwrite($file,$text);
+			fclose($file);
+			return $len;
+		}
+		public function createFile($name){
+			$ggurl = $this->lasturl.$this->type.$name;
+			if(!file_exists($ggurl)){
+				fopen($ggurl,'w+');
+				return new MFileSystem($ggurl,$this->lasturl,$this->type);
+			}
+			return false;
+		}
+		public function append($text){
 
+			$file = fopen($this->url,"a");
+			$len = fwrite($file,$text);
+			fclose($file);
+			return $len;
+			
+		}
+		public function rename($name){
+			return rename($this->url, $this->lasturl.$this->type.$name);
+		}
+		public function remove(){
+			return unlink($this->url);
+		}
 	}
 	class MFile{
 		protected $url;
 		protected $concat;
+		protected $nowOpen;
+		protected $nowOpenType; //1 File ,2 Folder
 		protected $childrenAllName = Array();
 		protected $childrenName = Array();
 		function __construct($url){
 			if(is_dir($url)){
 				$this->url = $url;
-				if ($dh = opendir($url)){
-					while (($file = readdir($dh))!= false){
-						
-						$filePath = $url.$file;
-						
-						array_push($this->childrenAllName,$filePath);
-						array_push($this->childrenName,$file);
-						
-					}
-					closedir($dh);
-				}
-				$contype = new MString($url);
-				
-				if($contype->indexOf('/') != -1){
-					$this->concat = '/';
-				}else if($contype->indexOf('\\')  != -1){
-					$this->concat = '\\';
-				}
-				$this->url = $contype->replace('/[\|\/]$/','');
+				$this->compConstruct();
 			}
 		}	
+		protected function compConstruct(){
+			if ($dh = opendir($this->url)){
+				array_splice($this->childrenAllName,0,sizeof($this->childrenAllName)-1);
+				array_splice($this->childrenName,0,sizeof($this->childrenName)-1);
+				while (($file = readdir($dh))!= false){
+					$filePath = $this->url.$file;
+					array_push($this->childrenAllName,$filePath);
+					array_push($this->childrenName,$file);
+				}
+				closedir($dh);
+			}
+			$contype = new MString($this->url);
+			
+			if($contype->indexOf('/')){
+				$this->concat = '/';
+			}else if($contype->indexOf('\\')){
+				$this->concat = '\\';
+			}
+			$this->url = $contype->replace('/[\|\/]$/','');			
+		}
+		protected function compLastUrl(){
+			$gg = new MString($this->url);
+			$hh = $gg->split($this->concat);
+			$hh->pop();
+			return $hh->join($this->concat);
+		}
+		function __toString(){
+			return $this->url;
+		}
 		protected function concatURL($filename){
-
+			
 			return $this->url.$this->concat.$filename;
 		}
 		public function getChildren(){
@@ -283,10 +342,28 @@
 			return new MArray($this->childrenAllName);
 		}
 		public function open($filename){
-			echo $this->concat;
-			echo $this->concatURL($filename);
+			$this->nowOpen = $this->concatURL($filename);
+			if(file_exists($this->nowOpen)){
+				if(is_file($this->nowOpen)){
+					$this->nowOpenType = 1;
+					return new MFileSystem($this->nowOpen,$this->url,$this->concat);
+				}else{
+					$this->nowOpenType = 2;
+					$this->url = $this->nowOpen;
+					$this->compConstruct();
+				}	
+				return $this;
+			}else{
+				return false;
+			}
+		}
+		public function rename($name){
+			$last = $this->compLastUrl();
+			return rename($this->url,$last.$this->concat.$name);
 		}
 	}
-	
+	$gg = new MFile('F:\\cpp\\php');
+
+	$gg->rename('ss');
 
 ?>
